@@ -27,6 +27,21 @@
   .controls button { background: none; border: 1px solid var(--border); color: var(--muted); padding: 0.3rem 0.8rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
   .controls button:hover { border-color: var(--accent2); color: var(--accent2); }
 
+  /* Live status banner */
+  .live-banner { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 2rem; border-bottom: 1px solid var(--border); background: var(--surface2); }
+  .pulse { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .pulse-working { background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 1.5s infinite; }
+  .pulse-sleeping { background: var(--muted); }
+  .pulse-cooldown { background: var(--amber); box-shadow: 0 0 6px var(--amber); animation: pulse 3s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .live-state { font-weight: 700; font-size: 0.85rem; }
+  .live-state.working { color: var(--green); }
+  .live-state.sleeping { color: var(--muted); }
+  .live-state.cooldown { color: var(--amber); }
+  .live-detail { color: var(--muted); font-size: 0.8rem; }
+  .live-window { margin-left: auto; font-size: 0.75rem; color: var(--muted); text-align: right; }
+  .live-window .timer { font-size: 0.95rem; color: var(--bright); font-weight: 600; font-variant-numeric: tabular-nums; }
+
   /* Focus bar */
   .focus-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); background: var(--surface); }
   .focus-item { flex: 1; text-align: center; padding: 0.6rem; border-right: 1px solid var(--border); }
@@ -91,6 +106,18 @@
   <div class="controls">
     <button onclick="expandAll()">≫ EXPAND ALL</button>
     <button onclick="collapseAll()">≪ COLLAPSE ALL</button>
+  </div>
+</div>
+
+<div class="live-banner" id="live-banner">
+  <div class="pulse" id="live-pulse"></div>
+  <div>
+    <div class="live-state" id="live-state">LOADING...</div>
+    <div class="live-detail" id="live-detail"></div>
+  </div>
+  <div class="live-window">
+    <div>Token Window</div>
+    <div class="timer" id="live-timer">--:--:--</div>
   </div>
 </div>
 
@@ -295,6 +322,68 @@ function expandAll() { document.querySelectorAll('.category').forEach(c => c.cla
 function collapseAll() { document.querySelectorAll('.category').forEach(c => c.classList.remove('open')); }
 
 renderRoadmap();
+
+// Live status from status.json
+async function loadStatus() {
+  try {
+    const res = await fetch('status.json?t=' + Date.now());
+    if (!res.ok) throw new Error('no status');
+    const s = await res.json();
+    
+    const pulse = document.getElementById('live-pulse');
+    const state = document.getElementById('live-state');
+    const detail = document.getElementById('live-detail');
+    const timer = document.getElementById('live-timer');
+    
+    const isWorking = s.state === 'WORKING' && s.claudeCodeActive;
+    const isSleeping = s.state === 'PAUSED' || s.state === 'SLEEPING';
+    
+    if (isWorking) {
+      pulse.className = 'pulse pulse-working';
+      state.className = 'live-state working';
+      state.textContent = '● WORKING';
+      detail.textContent = s.currentTask || 'Executing tasks...';
+      if (s.claudeCodeProcesses > 1) detail.textContent += ` (${s.claudeCodeProcesses} parallel)`;
+    } else if (isSleeping) {
+      pulse.className = 'pulse pulse-sleeping';
+      state.className = 'live-state sleeping';
+      state.textContent = '○ SLEEPING';
+      detail.textContent = 'Token window exhausted — waiting for reset';
+    } else {
+      pulse.className = 'pulse pulse-cooldown';
+      state.className = 'live-state cooldown';
+      state.textContent = '◐ IDLE';
+      detail.textContent = s.currentTask || 'Between tasks';
+    }
+    
+    // Token window countdown
+    if (s.tokenWindow && s.tokenWindow.end) {
+      const end = new Date(s.tokenWindow.end).getTime();
+      function tick() {
+        const remaining = end - Date.now();
+        if (remaining <= 0) { timer.textContent = 'EXPIRED'; return; }
+        const h = Math.floor(remaining / 3600000);
+        const m = Math.floor((remaining % 3600000) / 60000);
+        const sec = Math.floor((remaining % 60000) / 1000);
+        timer.textContent = `${h}h ${String(m).padStart(2,'0')}m ${String(sec).padStart(2,'0')}s remaining`;
+        requestAnimationFrame(tick);
+      }
+      tick();
+    }
+    
+    // Show last update age
+    if (s.timestamp) {
+      const age = Math.floor((Date.now() - new Date(s.timestamp).getTime()) / 60000);
+      detail.textContent += ` · updated ${age}m ago`;
+    }
+  } catch(e) {
+    document.getElementById('live-state').textContent = '? STATUS UNAVAILABLE';
+    document.getElementById('live-detail').textContent = 'Could not load status.json';
+  }
+}
+
+loadStatus();
+setInterval(loadStatus, 60000);
 </script>
 </body>
 </html>

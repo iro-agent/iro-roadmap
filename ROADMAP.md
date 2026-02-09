@@ -23,11 +23,11 @@ _Theme: Build the autonomous work engine_
 - [x] Work Orchestrator — continuous task execution with token-aware scheduling
 - [x] GitHub Pages roadmap site — live dashboard of progress  
 - [x] Token window management — detect exhaustion, schedule resumption
+- [x] Auto-commit Pipeline — multi-repo system with intelligent commit messages, security scanning
+- [x] Semantic Memory Search — vector embeddings with all-MiniLM-L6-v2, 1043 vectors indexed, CLI interface
+- [x] Auto-summarization Pipeline — daily log compression with analyzer/summarizer/integration components
 - [ ] Hourly check-in cron — status updates, ideation, priority review
-- [ ] Adaptive flywheel system — process monitoring, auto-restart, health checks  
-- [ ] Performance monitoring — comprehensive metrics and timing hooks
-- [ ] System integration layer — unified API across all orchestrator systems
-- [ ] Smart task batching — context switching optimization and intelligent grouping
+- [ ] Adaptive flywheel system — process monitoring, auto-restart, health checks
 - [x] Auto-commit pipeline — intelligent commit messages, multi-repo management, security scanning
 - [x] Work queue with stack-ranked priorities
 - [x] Ideation engine — generate and evaluate new work items

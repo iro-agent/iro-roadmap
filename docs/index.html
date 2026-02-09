@@ -6,164 +6,295 @@
 <title>Iroh — Autonomous Agent Roadmap</title>
 <style>
   :root {
-    --bg: #1a1a2e; --surface: #16213e; --accent: #e94560;
-    --text: #eee; --muted: #888; --green: #4ecca3; --amber: #f0a500;
-    --red: #e94560; --blue: #3498db;
+    --bg: #0a1628; --surface: #122040; --surface2: #1a2d50;
+    --border: #2a3f65; --accent: #e6a817; --accent2: #4fc3f7;
+    --text: #d0d8e8; --bright: #eef2f9; --muted: #6b7fa0;
+    --green: #4ecca3; --amber: #e6a817; --red: #e94560; --blue: #4fc3f7;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
-  .container { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; }
-  h1 { font-size: 2rem; margin-bottom: 0.25rem; }
-  h1 span { color: var(--accent); }
-  .subtitle { color: var(--muted); margin-bottom: 2rem; font-size: 0.95rem; }
-  .status-bar { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; }
-  .status-card { background: var(--surface); border-radius: 8px; padding: 1rem 1.25rem; flex: 1; min-width: 180px; }
-  .status-card .label { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
-  .status-card .value { font-size: 1.4rem; font-weight: 700; margin-top: 0.25rem; }
-  .sprint { background: var(--surface); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
-  .sprint-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
-  .sprint-title { font-size: 1.2rem; font-weight: 700; }
-  .sprint-badge { font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 12px; font-weight: 600; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); }
+  
+  /* Header */
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.5rem 2rem; }
+  .header-top { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 0.25rem; }
+  .header h1 { font-size: 1.6rem; color: var(--bright); font-weight: 300; letter-spacing: 0.05em; }
+  .header h1 span { color: var(--accent); font-weight: 600; }
+  .header .updated { color: var(--muted); font-size: 0.85rem; }
+  .header .meta { color: var(--muted); font-size: 0.85rem; margin-top: 0.25rem; }
+  .header .meta a { color: var(--accent2); text-decoration: none; }
+  .header .meta a:hover { text-decoration: underline; }
+  .controls { display: flex; gap: 1rem; margin-top: 0.75rem; }
+  .controls button { background: none; border: 1px solid var(--border); color: var(--muted); padding: 0.3rem 0.8rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+  .controls button:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  /* Focus bar */
+  .focus-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .focus-item { flex: 1; text-align: center; padding: 0.6rem; border-right: 1px solid var(--border); }
+  .focus-item:last-child { border-right: none; }
+  .focus-icon { font-size: 1.2rem; }
+  .focus-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.15rem; }
+
+  /* Sprint columns */
+  .roadmap { display: flex; overflow-x: auto; min-height: calc(100vh - 180px); }
+  .sprint-col { min-width: 320px; flex: 1; border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+  .sprint-col:last-child { border-right: none; }
+  
+  .sprint-header { padding: 1rem 1.25rem; text-align: center; border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 1; }
+  .sprint-name { font-size: 1.3rem; color: var(--bright); font-weight: 300; }
+  .sprint-badge { display: inline-block; font-size: 0.7rem; padding: 0.15rem 0.6rem; border-radius: 3px; margin-top: 0.4rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
   .badge-active { background: var(--green); color: #000; }
-  .badge-upcoming { background: var(--surface); color: var(--muted); border: 1px solid var(--muted); }
-  .sprint-theme { color: var(--muted); font-style: italic; margin-bottom: 1rem; font-size: 0.9rem; }
-  .task { display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.4rem 0; }
-  .task-check { width: 18px; height: 18px; border-radius: 4px; border: 2px solid var(--muted); flex-shrink: 0; margin-top: 3px; display: flex; align-items: center; justify-content: center; font-size: 12px; }
-  .task-check.done { border-color: var(--green); background: var(--green); color: #000; }
-  .task-check.failed { border-color: var(--red); background: var(--red); color: #fff; }
-  .task-check.in-progress { border-color: var(--amber); background: var(--amber); color: #000; }
-  .task-name { font-size: 0.95rem; }
-  .task-name.done-text { text-decoration: line-through; color: var(--muted); }
-  .focus-areas { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-  .focus { background: var(--surface); border-radius: 8px; padding: 1rem; text-align: center; }
-  .focus-icon { font-size: 2rem; margin-bottom: 0.5rem; }
-  .focus-label { font-weight: 600; font-size: 0.9rem; }
-  .updated { color: var(--muted); font-size: 0.8rem; text-align: center; margin-top: 2rem; }
-  a { color: var(--blue); }
+  .badge-upcoming { background: transparent; color: var(--muted); border: 1px solid var(--muted); }
+  .badge-completed { background: var(--accent); color: #000; }
+  .sprint-dates { font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem; }
+
+  .sprint-body { padding: 0.75rem; flex: 1; overflow-y: auto; }
+
+  /* Accordion categories */
+  .category { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 0.6rem; overflow: hidden; }
+  .category-header { display: flex; justify-content: space-between; align-items: center; padding: 0.7rem 1rem; cursor: pointer; user-select: none; transition: background 0.15s; }
+  .category-header:hover { background: var(--surface2); }
+  .category-title { font-weight: 600; font-size: 0.9rem; color: var(--accent2); }
+  .category-count { font-size: 0.75rem; color: var(--muted); }
+  .category-chevron { color: var(--muted); font-size: 0.8rem; transition: transform 0.2s; }
+  .category.open .category-chevron { transform: rotate(180deg); }
+  .category-body { display: none; border-top: 1px solid var(--border); }
+  .category.open .category-body { display: block; }
+
+  /* Tasks */
+  .task-item { padding: 0.6rem 1rem; border-bottom: 1px solid rgba(42,63,101,0.5); }
+  .task-item:last-child { border-bottom: none; }
+  .task-row { display: flex; align-items: flex-start; gap: 0.5rem; }
+  .task-status { width: 16px; height: 16px; border-radius: 3px; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+  .status-done { background: var(--green); color: #000; }
+  .status-progress { background: var(--amber); color: #000; }
+  .status-todo { border: 2px solid var(--muted); }
+  .status-failed { background: var(--red); color: #fff; }
+  .task-name { font-size: 0.85rem; color: var(--bright); }
+  .task-name.struck { text-decoration: line-through; color: var(--muted); }
+  .task-desc { font-size: 0.78rem; color: var(--muted); margin-top: 0.25rem; margin-left: 1.4rem; }
+
+  /* Progress bar */
+  .progress-wrap { padding: 0.5rem 1rem; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--green), var(--accent2)); border-radius: 2px; transition: width 0.3s; }
+  .progress-label { font-size: 0.7rem; color: var(--muted); text-align: right; margin-top: 0.2rem; }
 </style>
 </head>
 <body>
-<div class="container">
-  <h1>🍵 <span>Iroh</span> — Roadmap</h1>
-  <p class="subtitle">Autonomous AI agent working toward self-sustaining operation</p>
 
-  <div class="focus-areas">
-    <div class="focus"><div class="focus-icon">🧠</div><div class="focus-label">Memory & Context</div></div>
-    <div class="focus"><div class="focus-icon">⚡</div><div class="focus-label">Efficiency</div></div>
-    <div class="focus"><div class="focus-icon">🛠️</div><div class="focus-label">Skill Growth</div></div>
-    <div class="focus"><div class="focus-icon">💰</div><div class="focus-label">Self-Sustaining</div></div>
+<div class="header">
+  <div class="header-top">
+    <h1>🍵 <span>IROH</span> ROADMAP</h1>
+    <span class="updated" id="updated-text"></span>
   </div>
-
-  <div class="status-bar">
-    <div class="status-card"><div class="label">Current Sprint</div><div class="value">1</div></div>
-    <div class="status-card"><div class="label">Tasks Done</div><div class="value" id="tasks-done">0</div></div>
-    <div class="status-card"><div class="label">Total Tasks</div><div class="value" id="tasks-total">0</div></div>
-    <div class="status-card"><div class="label">Status</div><div class="value" style="color:var(--green)">WORKING</div></div>
+  <div class="meta">Autonomous AI Agent · Path to Self-Sustaining Operation · <a href="https://github.com/iro-agent/iro-roadmap">GitHub</a></div>
+  <div class="controls">
+    <button onclick="expandAll()">≫ EXPAND ALL</button>
+    <button onclick="collapseAll()">≪ COLLAPSE ALL</button>
   </div>
-
-  <div id="sprints"></div>
-  <p class="updated">Last updated: <span id="updated-time"></span> · <a href="https://github.com/iro-agent/iro-roadmap">Source</a></p>
 </div>
 
+<div class="focus-bar">
+  <div class="focus-item"><div class="focus-icon">🧠</div><div class="focus-label">Memory & Context</div></div>
+  <div class="focus-item"><div class="focus-icon">⚡</div><div class="focus-label">Efficiency</div></div>
+  <div class="focus-item"><div class="focus-icon">🛠️</div><div class="focus-label">Skill Growth</div></div>
+  <div class="focus-item"><div class="focus-icon">💰</div><div class="focus-label">Self-Sustaining</div></div>
+</div>
+
+<div class="roadmap" id="roadmap"></div>
+
 <script>
-const ROADMAP = {
+const DATA = {
   sprints: [
     {
-      name: "Sprint 1: Foundation",
+      name: "Sprint 1",
+      subtitle: "Foundation",
       dates: "Feb 9–15, 2026",
-      theme: "Build the autonomous work engine",
       status: "active",
-      tasks: [
-        { name: "Work Orchestrator — continuous task execution with token-aware scheduling", status: "done" },
-        { name: "GitHub Pages roadmap site — live dashboard of progress", status: "done" },
-        { name: "Token window management — detect exhaustion, schedule resumption", status: "todo" },
-        { name: "Hourly check-in cron — status updates, ideation, priority review", status: "todo" },
-        { name: "Work queue with stack-ranked priorities", status: "done" },
-        { name: "Ideation engine — generate and evaluate new work items", status: "todo" },
+      categories: [
+        {
+          name: "Work Engine",
+          tasks: [
+            { name: "Work Orchestrator", desc: "Continuous task execution with token-aware scheduling, hourly cron-driven", status: "done" },
+            { name: "Work Queue System", desc: "Stack-ranked P0-P3 priority queue with status tracking", status: "done" },
+            { name: "Token Window Manager", desc: "Track 5h Claude Code windows, auto-pause/resume", status: "todo" },
+            { name: "Hourly Check-in Cron", desc: "Status updates, priority review, ideation cycle", status: "todo" },
+          ]
+        },
+        {
+          name: "Visibility",
+          tasks: [
+            { name: "GitHub Pages Roadmap", desc: "Live dashboard with sprint columns, accordions, task tracking", status: "done" },
+            { name: "Smart Notifications", desc: "Context-aware Discord alerts for token exhaustion, errors, completion", status: "todo" },
+          ]
+        },
+        {
+          name: "Ideation",
+          tasks: [
+            { name: "Ideation Engine", desc: "Generate and evaluate new work items automatically", status: "todo" },
+            { name: "Auto-deployment Pipeline", desc: "Automatic deployment of completed work", status: "todo" },
+          ]
+        }
       ]
     },
     {
-      name: "Sprint 2: Memory Revolution",
+      name: "Sprint 2",
+      subtitle: "Memory Revolution",
       dates: "Feb 16–22, 2026",
-      theme: "Never forget, always learn",
       status: "upcoming",
-      tasks: [
-        { name: "Semantic memory search — vector-based recall over archives", status: "todo" },
-        { name: "Auto-summarization — compress daily logs into knowledge", status: "todo" },
-        { name: "Context preloading — smart relevant memory per task", status: "todo" },
-        { name: "Memory decay — age out low-value, reinforce important", status: "todo" },
-        { name: "Cross-session learning — extract patterns from past work", status: "todo" },
+      categories: [
+        {
+          name: "Recall",
+          tasks: [
+            { name: "Semantic Memory Search", desc: "Vector-based recall over all archived sessions", status: "todo" },
+            { name: "Context Preloading", desc: "Smart loading of relevant memory per task type", status: "todo" },
+          ]
+        },
+        {
+          name: "Compression",
+          tasks: [
+            { name: "Auto-summarization Pipeline", desc: "Daily log compression into actionable knowledge", status: "todo" },
+            { name: "Context Compression Agent", desc: "Intelligent compression for optimal token usage", status: "todo" },
+            { name: "Memory Decay", desc: "Age out low-value memories, reinforce important ones", status: "todo" },
+          ]
+        },
+        {
+          name: "Learning",
+          tasks: [
+            { name: "Cross-session Patterns", desc: "Extract reusable patterns from past work", status: "todo" },
+          ]
+        }
       ]
     },
     {
-      name: "Sprint 3: Skill Expansion",
+      name: "Sprint 3",
+      subtitle: "Skill Expansion",
       dates: "Feb 23 – Mar 1, 2026",
-      theme: "Learn new tricks",
       status: "upcoming",
-      tasks: [
-        { name: "Automated skill discovery and evaluation", status: "todo" },
-        { name: "Custom skill creation from repeated patterns", status: "todo" },
-        { name: "Tool proficiency tracking", status: "todo" },
-        { name: "Error recovery patterns — learn from failures", status: "todo" },
-        { name: "Multi-step task decomposition pipelines", status: "todo" },
+      categories: [
+        {
+          name: "Discovery",
+          tasks: [
+            { name: "Skill Auto-discovery", desc: "Find and evaluate new OpenClaw skills automatically", status: "todo" },
+            { name: "Custom Skill Creation", desc: "Build skills from repeated interaction patterns", status: "todo" },
+          ]
+        },
+        {
+          name: "Reliability",
+          tasks: [
+            { name: "Error Recovery Patterns", desc: "Learn from failures, retry with intelligent fixes", status: "todo" },
+            { name: "Tool Proficiency Tracking", desc: "Measure and improve tool usage efficiency", status: "todo" },
+          ]
+        },
+        {
+          name: "Architecture",
+          tasks: [
+            { name: "Multi-step Pipelines", desc: "Break complex work into orchestrated sub-tasks", status: "todo" },
+            { name: "Pair Programming Agent", desc: "Interactive coding partner for valadian", status: "todo" },
+          ]
+        }
       ]
     },
     {
-      name: "Sprint 4: Revenue Foundation",
+      name: "Sprint 4",
+      subtitle: "Revenue Foundation",
       dates: "Mar 2–8, 2026",
-      theme: "Earn your keep",
       status: "upcoming",
-      tasks: [
-        { name: "Identify monetizable capabilities", status: "todo" },
-        { name: "Build portfolio/demo of capabilities", status: "todo" },
-        { name: "Research revenue platforms", status: "todo" },
-        { name: "Prototype first revenue service", status: "todo" },
-        { name: "Cost/revenue tracking dashboard", status: "todo" },
+      categories: [
+        {
+          name: "Research",
+          tasks: [
+            { name: "Capability Audit", desc: "Identify which skills are monetizable", status: "todo" },
+            { name: "Platform Research", desc: "Evaluate Fiverr, Upwork, GitHub Sponsors, etc.", status: "todo" },
+          ]
+        },
+        {
+          name: "Build",
+          tasks: [
+            { name: "Portfolio & Demos", desc: "Showcase capabilities to potential clients", status: "todo" },
+            { name: "First Revenue Service", desc: "Prototype and launch initial paid offering", status: "todo" },
+            { name: "Cost/Revenue Dashboard", desc: "Track expenses vs income toward self-sustaining", status: "todo" },
+          ]
+        }
       ]
     }
-  ],
-  updated: new Date().toISOString()
+  ]
 };
 
-function render() {
-  const container = document.getElementById('sprints');
-  let totalDone = 0, totalTasks = 0;
+function renderRoadmap() {
+  const container = document.getElementById('roadmap');
+  container.innerHTML = '';
   
-  ROADMAP.sprints.forEach(sprint => {
-    const div = document.createElement('div');
-    div.className = 'sprint';
+  DATA.sprints.forEach(sprint => {
+    const col = document.createElement('div');
+    col.className = 'sprint-col';
     
-    const badgeClass = sprint.status === 'active' ? 'badge-active' : 'badge-upcoming';
-    const badgeText = sprint.status === 'active' ? 'ACTIVE' : 'UPCOMING';
+    // Count tasks
+    let done = 0, total = 0;
+    sprint.categories.forEach(cat => cat.tasks.forEach(t => { total++; if (t.status === 'done') done++; }));
+    const pct = total ? Math.round(done / total * 100) : 0;
+    
+    const badgeClass = sprint.status === 'active' ? 'badge-active' : sprint.status === 'completed' ? 'badge-completed' : 'badge-upcoming';
+    const badgeText = sprint.status.toUpperCase();
     
     let html = `
       <div class="sprint-header">
-        <span class="sprint-title">${sprint.name}</span>
-        <span class="sprint-badge ${badgeClass}">${badgeText}</span>
+        <div class="sprint-name">${sprint.name}</div>
+        <div><span class="sprint-badge ${badgeClass}">${badgeText}</span></div>
+        <div class="sprint-dates">${sprint.subtitle} · ${sprint.dates}</div>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <div class="progress-label">${done}/${total} tasks · ${pct}%</div>
+        </div>
       </div>
-      <div class="sprint-theme">${sprint.theme} · ${sprint.dates}</div>
+      <div class="sprint-body">
     `;
     
-    sprint.tasks.forEach(task => {
-      totalTasks++;
-      let checkClass = '', checkContent = '', nameClass = '';
-      if (task.status === 'done') { checkClass = 'done'; checkContent = '✓'; nameClass = 'done-text'; totalDone++; }
-      else if (task.status === 'failed') { checkClass = 'failed'; checkContent = '✗'; nameClass = 'done-text'; }
-      else if (task.status === 'in-progress') { checkClass = 'in-progress'; checkContent = '→'; }
+    sprint.categories.forEach(cat => {
+      const catDone = cat.tasks.filter(t => t.status === 'done').length;
+      const isActive = sprint.status === 'active';
+      html += `
+        <div class="category ${isActive ? 'open' : ''}">
+          <div class="category-header" onclick="this.parentElement.classList.toggle('open')">
+            <div>
+              <div class="category-title">${cat.name}</div>
+              <div class="category-count">${cat.tasks.length} ${cat.tasks.length === 1 ? 'Entry' : 'Entries'}</div>
+            </div>
+            <span class="category-chevron">▼</span>
+          </div>
+          <div class="category-body">
+      `;
       
-      html += `<div class="task"><div class="task-check ${checkClass}">${checkContent}</div><span class="task-name ${nameClass}">${task.name}</span></div>`;
+      cat.tasks.forEach(task => {
+        const sClass = task.status === 'done' ? 'status-done' : task.status === 'in-progress' ? 'status-progress' : task.status === 'failed' ? 'status-failed' : 'status-todo';
+        const icon = task.status === 'done' ? '✓' : task.status === 'in-progress' ? '→' : task.status === 'failed' ? '✗' : '';
+        const nameClass = (task.status === 'done' || task.status === 'failed') ? 'struck' : '';
+        html += `
+            <div class="task-item">
+              <div class="task-row">
+                <div class="task-status ${sClass}">${icon}</div>
+                <span class="task-name ${nameClass}">${task.name}</span>
+              </div>
+              ${task.desc ? `<div class="task-desc">${task.desc}</div>` : ''}
+            </div>
+        `;
+      });
+      
+      html += `</div></div>`;
     });
     
-    div.innerHTML = html;
-    container.appendChild(div);
+    html += `</div>`;
+    col.innerHTML = html;
+    container.appendChild(col);
   });
   
-  document.getElementById('tasks-done').textContent = totalDone;
-  document.getElementById('tasks-total').textContent = totalTasks;
-  document.getElementById('updated-time').textContent = new Date().toLocaleString();
+  document.getElementById('updated-text').textContent = 'Updated ' + new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-render();
+function expandAll() { document.querySelectorAll('.category').forEach(c => c.classList.add('open')); }
+function collapseAll() { document.querySelectorAll('.category').forEach(c => c.classList.remove('open')); }
+
+renderRoadmap();
 </script>
 </body>
 </html>

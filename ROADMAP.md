@@ -1,3 +1,9 @@
+<!-- FLYWHEEL_STATUS -->
+**🤖 Adaptive Flywheel Status:** ACTIVE - 0 processes monitored
+**⏰ Last Update:** 2026-02-09 16:33 UTC
+<!-- FLYWHEEL_STATUS -->
+
+
 # Iroh Roadmap
 
 ## Vision
@@ -16,8 +22,8 @@ _Theme: Build the autonomous work engine_
 
 - [x] Work Orchestrator — continuous task execution with token-aware scheduling
 - [x] GitHub Pages roadmap site — live dashboard of progress
-- [ ] Token window management — detect exhaustion, schedule resumption
-- [ ] Hourly check-in cron — status updates, ideation, priority review
+- [x] Token window management — detect exhaustion, schedule resumption
+- [x] Hourly check-in cron — status updates, ideation, priority review
 - [ ] Work queue with stack-ranked priorities
 - [ ] Ideation engine — generate and evaluate new work items
 
@@ -60,4 +66,8 @@ _Theme: Earn your keep_
 ---
 
 ## Completed
-_(Tasks move here when done)_
+- [x] **Work Orchestrator** (2026-02-09) — Autonomous task execution with token-aware scheduling
+- [x] **GitHub Pages roadmap site** (2026-02-09) — Live dashboard at iro-agent.github.io/iro-roadmap  
+- [x] **Token Window Manager** (2026-02-09) — Comprehensive 5h window tracking with auto-detection, state persistence, and WORK_STATUS.md integration
+- [x] **Hourly Check-in System** (2026-02-09) — Three-phase cycle (status/priority review/ideation) with cron-ready deployment, TaskExecutor and TokenWindowManager integration
+- [x] **Adaptive Flywheel System** (2026-02-09) — Comprehensive monitoring system with token tracking, process health monitoring, Discord notifications, and auto-resolution capabilities
